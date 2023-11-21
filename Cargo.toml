@@ -11,7 +11,10 @@ uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "en
 ethers = { version = "2.0", features = ["abigen"] }
 serde = { version = "1.0", features = ["derive"] }
 futures = "0.3"
+tower = { version = "0.4", features = ["limit"] }
+reqwest = "0.11"
 dashu-float = "0.4"
+pin-project = "1"
 thiserror = "1.0"
 anyhow = "1.0.72"
 
