@@ -2,11 +2,12 @@ use serde::Serialize;
 
 use super::OrderStatus;
 
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "snake_case")]
+#[derive(Debug, Clone, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OrdersRequest {
-    pub chain_id: u64,
+    pub chain_id: Option<u64>,
     pub order_status: Option<OrderStatus>,
+    pub order_hash: Option<String>,
     pub cursor: Option<String>,
 }
 
@@ -15,6 +16,7 @@ impl OrdersRequest {
         Self {
             chain_id: self.chain_id,
             order_status: self.order_status.clone(),
+            order_hash: self.order_hash.clone(),
             cursor,
         }
     }
