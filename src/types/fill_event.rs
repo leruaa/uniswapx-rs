@@ -39,7 +39,7 @@ impl PartialEq for FillEvent {
 
 impl PartialOrd for FillEvent {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.block_number.partial_cmp(&other.block_number)
+        Some(self.cmp(other))
     }
 }
 
