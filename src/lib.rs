@@ -7,4 +7,4 @@ pub mod types;
 pub use order_stream::orders_stream;
 pub use orders_service::OrdersService;
 pub use reactor_client::ReactorClient;
-pub use uniswapx_rs::order::{ExclusiveDutchOrder, OrderResolution, ResolvedOrder};
+pub use uniswapx_rs::order::{decode_order, ExclusiveDutchOrder, OrderResolution, ResolvedOrder};
