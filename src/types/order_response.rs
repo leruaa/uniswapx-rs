@@ -9,11 +9,23 @@ use super::Order;
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum OrderResponse {
-    Orders {
-        orders: Vec<Order>,
-        cursor: Option<String>,
-    },
+    Orders(OrderPayload),
     Error(OrderResponseError),
+}
+
+impl From<OrderResponse> for Result<OrderPayload, OrderResponseError> {
+    fn from(value: OrderResponse) -> Self {
+        match value {
+            OrderResponse::Orders(orders) => Ok(orders),
+            OrderResponse::Error(err) => Err(err),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct OrderPayload {
+    pub orders: Vec<Order>,
+    pub cursor: Option<String>,
 }
 
 #[derive(Error, Debug, Clone, Deserialize)]
@@ -28,7 +40,7 @@ impl TryFrom<OrderResponse> for Vec<Order> {
 
     fn try_from(value: OrderResponse) -> Result<Self, Self::Error> {
         match value {
-            OrderResponse::Orders { orders, .. } => Ok(orders),
+            OrderResponse::Orders(payload) => Ok(payload.orders),
             OrderResponse::Error(err) => Err(err),
         }
     }

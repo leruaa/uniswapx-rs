@@ -12,7 +12,7 @@ pub use fill_event::FillEvent;
 pub use order::Order;
 pub use order_input::OrderInput;
 pub use order_output::OrderOutput;
-pub use order_response::OrderResponse;
+pub use order_response::{OrderPayload, OrderResponse, OrderResponseError};
 pub use order_status::OrderStatus;
 pub use order_type::OrderType;
 pub use orders_request::OrdersRequest;

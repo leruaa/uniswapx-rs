@@ -3,12 +3,12 @@ use std::{
     task::{Context, Poll},
 };
 
-use anyhow::Error;
 use futures::{Future, TryFutureExt};
 use reqwest::Client as HttpClient;
+use thiserror::Error;
 use tower::Service;
 
-use crate::types::{OrderResponse, OrdersRequest};
+use crate::types::{OrderPayload, OrderResponse, OrderResponseError, OrdersRequest};
 
 pub struct OrdersService {
     http_client: HttpClient,
@@ -25,9 +25,9 @@ impl OrdersService {
 }
 
 impl Service<OrdersRequest> for OrdersService {
-    type Response = OrderResponse;
+    type Response = OrderPayload;
 
-    type Error = Error;
+    type Error = OrdersError;
 
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
@@ -41,9 +41,22 @@ impl Service<OrdersRequest> for OrdersService {
             .get(self.url.clone())
             .query(&req)
             .send()
-            .and_then(|response| response.json::<OrderResponse>())
-            .map_err(Error::from);
+            .map_err(Into::into)
+            .and_then(|response| {
+                response
+                    .json::<OrderResponse>()
+                    .map_ok(|response| Result::from(response).map_err(Into::into))
+                    .unwrap_or_else(|err| Err(OrdersError::from(err)))
+            });
 
         Box::pin(fut)
     }
+}
+
+#[derive(Error, Debug)]
+pub enum OrdersError {
+    #[error(transparent)]
+    Send(#[from] reqwest::Error),
+    #[error(transparent)]
+    UniswapX(#[from] OrderResponseError),
 }
