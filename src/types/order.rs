@@ -1,5 +1,5 @@
+use alloy_primitives::Bytes;
 use anyhow::Error;
-use ethers::types::Bytes;
 use serde::Deserialize;
 use uniswapx_rs::order::{decode_order, ExclusiveDutchOrder};
 
