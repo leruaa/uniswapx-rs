@@ -8,8 +8,19 @@ edition = "2021"
 [dependencies]
 erc20 = { git = "https://github.com/leruaa/erc20-rs" }
 uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "encode_refactoring" }
-ethers = { version = "2.0", features = ["abigen"] }
+alloy-primitives = "0.5.1"
+alloy-sol-types = { version = "0.5.1", features = ["json"] }
+alloy-providers = { git = "https://github.com/alloy-rs/alloy" }
+alloy-rpc-client = { git = "https://github.com/alloy-rs/alloy" }
+alloy-rpc-types = { git = "https://github.com/alloy-rs/alloy" }
+alloy-json-rpc = { git = "https://github.com/alloy-rs/alloy" }
+alloy-transport = { git = "https://github.com/alloy-rs/alloy" }
+alloy-transport-http = { git = "https://github.com/alloy-rs/alloy" }
+alloy-transport-ws = { git = "https://github.com/alloy-rs/alloy" }
+alloy-pubsub = { git = "https://github.com/alloy-rs/alloy" }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio-stream = { version = "0.1", features = ["sync"] }
 futures = "0.3"
 tower = { version = "0.4", features = ["limit", "util"] }
 reqwest = "0.11"
@@ -21,3 +32,14 @@ anyhow = "1.0.72"
 serde_json = "1.0"
 tokio = { version = "1", features = ["rt", "macros"] }
 dotenv = "0.15"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[patch."https://github.com/alloy-rs/alloy"]
+alloy-providers = { path = "../alloy/crates/providers" }
+alloy-rpc-client = { path = "../alloy/crates/rpc-client" }
+alloy-rpc-types = { path = "../alloy/crates/rpc-types" }
+alloy-json-rpc = { path = "../alloy/crates/json-rpc" }
+alloy-transport = { path = "../alloy/crates/transport" }
+alloy-transport-http = { path = "../alloy/crates/transport-http" }
+alloy-transport-ws = { path = "../alloy/crates/transport-ws" }
+alloy-pubsub = { path = "../alloy/crates/pubsub" }

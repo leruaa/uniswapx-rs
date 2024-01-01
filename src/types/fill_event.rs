@@ -1,23 +1,23 @@
 use std::cmp::Ordering;
 
-use ethers::types::{Address, Bytes, H256, U64};
+use alloy_primitives::{Address, B256, U256};
 
 #[derive(Debug, Clone)]
 pub struct FillEvent {
-    pub order_hash: Bytes,
+    pub order_hash: B256,
     pub filler: Address,
     pub swapper: Address,
-    pub tx: H256,
-    pub block_number: U64,
+    pub tx: B256,
+    pub block_number: U256,
 }
 
 impl FillEvent {
     pub fn new(
-        order_hash: Bytes,
+        order_hash: B256,
         filler: Address,
         swapper: Address,
-        tx: H256,
-        block_number: U64,
+        tx: B256,
+        block_number: U256,
     ) -> Self {
         Self {
             order_hash,

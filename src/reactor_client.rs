@@ -1,43 +1,42 @@
-use std::{pin::Pin, sync::Arc};
+use std::sync::Arc;
 
-use anyhow::Result;
-use ethers::{
-    abi::FixedBytes,
-    prelude::abigen,
-    providers::{JsonRpcClient, Middleware, Provider, PubsubClient, StreamExt},
-    types::{Address, BlockNumber, Filter, Log},
+use alloy_json_rpc::{Id, Request, RequestMeta, ResponsePayload};
+use alloy_primitives::{Address, U256};
+use alloy_providers::provider::{Provider, TempProvider};
+use alloy_pubsub::PubSubFrontend;
+use alloy_rpc_types::{
+    pubsub::{Params, SubscriptionKind},
+    BlockNumberOrTag, Filter, Log,
 };
-use futures::Stream;
+use alloy_sol_types::{sol, SolEvent};
+use alloy_transport::BoxTransport;
+use anyhow::{anyhow, bail, Result};
+use futures::{stream::BoxStream, StreamExt, TryStreamExt};
+use tokio_stream::wrappers::BroadcastStream;
 
 use crate::{reactor_config::ReactorConfig, types::FillEvent};
 
-abigen!(
+sol!(
     ExclusiveDutchOrderReactorContract,
     "abi/exclusive_dutch_order_reactor.json"
 );
 
-pub struct ReactorClient<M> {
-    reactor_contract: ExclusiveDutchOrderReactorContract<Provider<M>>,
+pub struct ReactorClient {
     reactor_contract_address: Address,
-    provider: Arc<Provider<M>>,
 }
 
-impl<M: JsonRpcClient> ReactorClient<M> {
-    pub fn new(provider: Arc<Provider<M>>, chain_id: u64) -> Self {
+impl ReactorClient {
+    pub fn new(chain_id: u64) -> Self {
         let config = ReactorConfig::new(chain_id);
 
         Self {
-            reactor_contract: ExclusiveDutchOrderReactorContract::new(
-                config.address,
-                provider.clone(),
-            ),
             reactor_contract_address: config.address,
-            provider,
         }
     }
 
-    pub async fn get_fill_events<B: Into<BlockNumber>>(
+    pub async fn get_fill_events<B: Into<BlockNumberOrTag>>(
         &self,
+        provider: Arc<Provider<BoxTransport>>,
         from_block: B,
         to_block: Option<B>,
     ) -> Result<Vec<FillEvent>> {
@@ -47,13 +46,10 @@ impl<M: JsonRpcClient> ReactorClient<M> {
             .address(self.reactor_contract_address)
             .event("Fill(bytes32,address,address,uint256)");
 
-        let fill_event_logs = self.provider.get_logs(&filter).await?;
+        let fill_event_logs = provider.get_logs(filter).await?;
         let mut events = vec![];
 
-        for log in fill_event_logs
-            .into_iter()
-            .filter(|l| !l.removed.unwrap_or_default())
-        {
+        for log in fill_event_logs.into_iter().filter(|l| !l.removed) {
             let fill = self.decode_fill_event(log)?;
 
             events.push(fill);
@@ -63,40 +59,59 @@ impl<M: JsonRpcClient> ReactorClient<M> {
     }
 
     pub fn decode_fill_event(&self, log: Log) -> Result<FillEvent> {
-        let (order_hash, filler, swapper, _) =
-            self.reactor_contract
-                .decode_event::<(FixedBytes, Address, Address, u64)>(
-                    "Fill",
-                    log.topics.clone(),
-                    log.data.clone(),
-                )?;
+        let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_object(
+            &log.clone().try_into()?,
+            true,
+        )?;
 
         let fill = FillEvent::new(
-            order_hash.into(),
-            filler,
-            swapper,
+            ev.orderHash,
+            ev.filler,
+            ev.swapper,
             log.transaction_hash.unwrap(),
             log.block_number.unwrap(),
         );
 
         Ok(fill)
     }
-}
 
-pub type FillEventStream<'a> = Pin<Box<dyn Stream<Item = FillEvent> + Send + 'a>>;
+    pub async fn get_fill_events_stream<'a>(
+        &self,
+        front_end: &PubSubFrontend,
+    ) -> Result<BoxStream<Result<Log>>> {
+        let req = Request {
+            meta: RequestMeta {
+                method: "eth_subscribe",
+                id: Id::None,
+            },
+            params: [
+                serde_json::to_value(SubscriptionKind::Logs)?,
+                serde_json::to_value(Params::Logs(Box::new(
+                    Filter::new()
+                        .address(self.reactor_contract_address)
+                        .event_signature(ExclusiveDutchOrderReactorContract::Fill::SIGNATURE_HASH),
+                )))?,
+            ],
+        };
 
-impl<M: JsonRpcClient + PubsubClient + Send + Sync + 'static> ReactorClient<M> {
-    pub async fn get_fill_events_stream(&self) -> Result<FillEventStream<'_>> {
-        let filter = Filter::new()
-            .address(self.reactor_contract_address)
-            .event("Fill(bytes32,address,address,uint256)");
-
-        let stream = self
-            .provider
-            .subscribe_logs(&filter)
+        let response = front_end
+            .send(req.serialize()?)
             .await?
-            .filter_map(|log: Log| async { self.decode_fill_event(log).ok() });
+            .deser_success::<U256>()
+            .map_err(|_| anyhow!("The payload can't be deserialized"))?;
 
-        Ok(Box::pin(stream))
+        let subscription_id = match response.payload {
+            ResponsePayload::Success(subscription_id) => subscription_id,
+            ResponsePayload::Failure(err) => bail!(err),
+        };
+
+        let rx = front_end.get_subscription(subscription_id).await?;
+
+        let stream = BroadcastStream::new(rx)
+            .map_err(|err| anyhow!(err))
+            .map_ok(|value| serde_json::from_str::<Log>(value.get()).map_err(|err| anyhow!(err)))
+            .map(|r| r.and_then(|x| x));
+
+        Ok(stream.boxed())
     }
 }
