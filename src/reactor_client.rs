@@ -59,7 +59,7 @@ impl ReactorClient {
     }
 
     pub fn decode_fill_event(&self, log: Log) -> Result<FillEvent> {
-        let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_object(
+        let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_data(
             &log.clone().try_into()?,
             true,
         )?;
