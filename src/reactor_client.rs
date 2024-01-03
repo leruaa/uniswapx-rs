@@ -50,7 +50,7 @@ impl ReactorClient {
         let mut events = vec![];
 
         for log in fill_event_logs.into_iter().filter(|l| !l.removed) {
-            let fill = self.decode_fill_event(log)?;
+            let fill = decode_fill_event(log)?;
 
             events.push(fill);
         }
@@ -58,27 +58,10 @@ impl ReactorClient {
         Ok(events)
     }
 
-    pub fn decode_fill_event(&self, log: Log) -> Result<FillEvent> {
-        let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_data(
-            &log.clone().try_into()?,
-            true,
-        )?;
-
-        let fill = FillEvent::new(
-            ev.orderHash,
-            ev.filler,
-            ev.swapper,
-            log.transaction_hash.unwrap(),
-            log.block_number.unwrap(),
-        );
-
-        Ok(fill)
-    }
-
     pub async fn get_fill_events_stream<'a>(
         &self,
         front_end: &PubSubFrontend,
-    ) -> Result<BoxStream<Result<Log>>> {
+    ) -> Result<BoxStream<Result<FillEvent>>> {
         let req = Request {
             meta: RequestMeta {
                 method: "eth_subscribe",
@@ -109,9 +92,28 @@ impl ReactorClient {
 
         let stream = BroadcastStream::new(rx)
             .map_err(|err| anyhow!(err))
-            .map_ok(|value| serde_json::from_str::<Log>(value.get()).map_err(|err| anyhow!(err)))
-            .map(|r| r.and_then(|x| x));
+            .map(|r| {
+                r.and_then(|value| {
+                    serde_json::from_str::<Log>(value.get()).map_err(|err| anyhow!(err))
+                })
+                .and_then(|log| decode_fill_event(log))
+            });
 
         Ok(stream.boxed())
     }
+}
+
+pub fn decode_fill_event(log: Log) -> Result<FillEvent> {
+    let ev =
+        ExclusiveDutchOrderReactorContract::Fill::decode_log_data(&log.clone().try_into()?, true)?;
+
+    let fill = FillEvent::new(
+        ev.orderHash,
+        ev.filler,
+        ev.swapper,
+        log.transaction_hash.unwrap(),
+        log.block_number.unwrap(),
+    );
+
+    Ok(fill)
 }
