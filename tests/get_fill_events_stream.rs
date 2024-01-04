@@ -1,5 +1,6 @@
 use std::env;
 
+use alloy_json_rpc::Id;
 use alloy_pubsub::PubSubConnect;
 use alloy_transport_ws::WsConnect;
 use dotenv::dotenv;
@@ -22,7 +23,7 @@ async fn test_get_fill_events_stream() {
     let reactor_client = ReactorClient::new(1);
 
     let mut stream = reactor_client
-        .get_fill_events_stream(&front_end)
+        .get_fill_events_stream(&front_end, Id::None)
         .await
         .unwrap();
 
