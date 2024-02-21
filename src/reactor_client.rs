@@ -44,7 +44,7 @@ impl ReactorClient {
             .from_block(from_block)
             .to_block(to_block.map(|b| b.into()).unwrap_or_default())
             .address(self.reactor_contract_address)
-            .event("Fill(bytes32,address,address,uint256)");
+            .event(ExclusiveDutchOrderReactorContract::Fill::SIGNATURE);
 
         let fill_event_logs = provider.get_logs(filter).await?;
         let mut events = vec![];
