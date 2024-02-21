@@ -1,4 +1,4 @@
-use alloy_primitives::Bytes;
+use alloy_primitives::{Bytes, B256};
 use anyhow::Error;
 use serde::Deserialize;
 use uniswapx_rs::order::{decode_order, ExclusiveDutchOrder};
@@ -9,7 +9,7 @@ use super::{OrderInput, OrderOutput, OrderStatus, OrderType, SettledAmount};
 #[serde(rename_all = "camelCase")]
 pub struct Order {
     pub chain_id: u64,
-    pub order_hash: String,
+    pub order_hash: B256,
     #[serde(rename = "type")]
     pub order_type: OrderType,
     pub order_status: OrderStatus,

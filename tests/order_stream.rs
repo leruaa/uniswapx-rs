@@ -1,5 +1,6 @@
 use std::pin::pin;
 
+use alloy_primitives::hex;
 use futures::StreamExt;
 use uniswapx::{orders_stream, types::OrdersRequest};
 
@@ -21,7 +22,8 @@ async fn test_order_stream() {
         .unwrap();
 
     assert_eq!(
-        next.order_hash, "0xe632accbc66d256b06a1dc086674c3e1ad35389f4a5092844514297fd2696fc9",
+        next.order_hash,
+        hex!("e632accbc66d256b06a1dc086674c3e1ad35389f4a5092844514297fd2696fc9"),
         "The stream should return the oldest order"
     );
 }
