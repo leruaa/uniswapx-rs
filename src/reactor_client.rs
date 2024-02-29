@@ -11,8 +11,10 @@ use alloy_rpc_types::{
 use alloy_sol_types::{sol, SolEvent};
 use alloy_transport::BoxTransport;
 use anyhow::{anyhow, bail, Context, Result};
-use futures::{stream::BoxStream, StreamExt, TryStreamExt};
-use tokio_stream::wrappers::BroadcastStream;
+use futures::{
+    stream::{self, BoxStream},
+    StreamExt, TryStreamExt,
+};
 
 use crate::{reactor_config::ReactorConfig, types::FillEvent};
 
@@ -64,10 +66,7 @@ impl ReactorClient {
         id: Id,
     ) -> Result<BoxStream<Result<FillEvent>>> {
         let req = Request {
-            meta: RequestMeta {
-                method: "eth_subscribe",
-                id,
-            },
+            meta: RequestMeta::new("eth_subscribe", id),
             params: [
                 serde_json::to_value(SubscriptionKind::Logs)?,
                 serde_json::to_value(Params::Logs(Box::new(
@@ -91,16 +90,20 @@ impl ReactorClient {
 
         let rx = front_end.get_subscription(subscription_id).await?;
 
-        let stream = BroadcastStream::new(rx)
-            .map_err(|err| anyhow!(err))
-            .map(|r| {
-                r.and_then(|value| {
-                    serde_json::from_str::<Log>(value.get())
-                        .map_err(|err| anyhow!(err))
-                        .context("Failed to deserialize log")
-                })
-                .and_then(|log| decode_fill_event(log).context("Failed to decode fille event"))
-            });
+        let stream = stream::unfold(rx, |mut rx| async move {
+            let value = rx.recv().await;
+
+            Some((value, rx))
+        });
+
+        let stream = stream.map_err(|err| anyhow!(err)).map(|r| {
+            r.and_then(|value| {
+                serde_json::from_str::<Log>(value.get())
+                    .map_err(|err| anyhow!(err))
+                    .context("Failed to deserialize log")
+            })
+            .and_then(|log| decode_fill_event(log).context("Failed to decode fille event"))
+        });
 
         Ok(stream.boxed())
     }

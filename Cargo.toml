@@ -10,14 +10,14 @@ erc20 = { git = "https://github.com/leruaa/erc20-rs" }
 uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "encode_refactoring" }
 alloy-primitives = "0.6"
 alloy-sol-types = { version = "0.6", features = ["json"] }
-alloy-providers = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-rpc-client = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-rpc-types = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-json-rpc = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-transport = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-transport-http = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-transport-ws = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
-alloy-pubsub = { git = "https://github.com/alloy-rs/alloy", rev = "11b8031" }
+alloy-providers = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-rpc-client = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-rpc-types = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-json-rpc = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-transport = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-transport-http = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-transport-ws = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
+alloy-pubsub = { git = "https://github.com/alloy-rs/alloy", rev = "d19dfe8" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio-stream = { version = "0.1", features = ["sync"] }
