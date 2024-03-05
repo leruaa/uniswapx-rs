@@ -13,8 +13,9 @@ use alloy_transport::BoxTransport;
 use anyhow::{anyhow, bail, Context, Result};
 use futures::{
     stream::{self, BoxStream},
-    StreamExt, TryStreamExt,
+    StreamExt,
 };
+use tracing::error;
 
 use crate::{reactor_config::ReactorConfig, types::FillEvent};
 
@@ -65,6 +66,8 @@ impl ReactorClient {
         front_end: &PubSubFrontend,
         id: Id,
     ) -> Result<BoxStream<Result<FillEvent>>> {
+        let stringified_id = id.to_string();
+
         let req = Request {
             meta: RequestMeta::new("eth_subscribe", id),
             params: [
@@ -90,18 +93,25 @@ impl ReactorClient {
 
         let rx = front_end.get_subscription(subscription_id).await?;
 
-        let stream = stream::unfold(rx, |mut rx| async move {
-            let value = rx.recv().await;
+        let stream = stream::unfold(
+            (rx, stringified_id),
+            |(mut rx, stringified_id)| async move {
+                match rx.recv().await {
+                    Ok(value) => Some((value, (rx, stringified_id))),
+                    Err(err) => {
+                        error!("Subscription {stringified_id} ended: {err}");
+                        None
+                    }
+                }
+            },
+        );
 
-            Some((value, rx))
-        });
-
-        let stream = stream.map_err(|err| anyhow!(err)).map(|r| {
-            r.and_then(|value| {
+        let stream = stream.map(|value| {
+            {
                 serde_json::from_str::<Log>(value.get())
                     .map_err(|err| anyhow!(err))
                     .context("Failed to deserialize log")
-            })
+            }
             .and_then(|log| decode_fill_event(log).context("Failed to decode fille event"))
         });
 
