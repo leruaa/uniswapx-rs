@@ -1,16 +1,17 @@
 use std::sync::Arc;
 
 use alloy_json_rpc::{Id, Request, RequestMeta, ResponsePayload};
+use alloy_network::Network;
 use alloy_primitives::{Address, U256};
-use alloy_providers::provider::{Provider, TempProvider};
+use alloy_provider::{Provider, RootProvider};
 use alloy_pubsub::PubSubFrontend;
 use alloy_rpc_types::{
     pubsub::{Params, SubscriptionKind},
     BlockNumberOrTag, Filter, Log,
 };
 use alloy_sol_types::{sol, SolEvent};
-use alloy_transport::BoxTransport;
-use anyhow::{anyhow, bail, Context, Result};
+use alloy_transport::Transport;
+use anyhow::{anyhow, bail, Result};
 use futures::{
     stream::{self, BoxStream},
     StreamExt,
@@ -37,12 +38,17 @@ impl ReactorClient {
         }
     }
 
-    pub async fn get_fill_events<B: Into<BlockNumberOrTag>>(
+    pub async fn get_fill_events<B, N, T>(
         &self,
-        provider: Arc<Provider<BoxTransport>>,
+        provider: Arc<RootProvider<N, T>>,
         from_block: B,
         to_block: Option<B>,
-    ) -> Result<Vec<FillEvent>> {
+    ) -> Result<Vec<FillEvent>>
+    where
+        B: Into<BlockNumberOrTag>,
+        N: Network,
+        T: Transport + Clone,
+    {
         let filter = Filter::new()
             .from_block(from_block)
             .to_block(to_block.map(|b| b.into()).unwrap_or_default())
@@ -109,10 +115,11 @@ impl ReactorClient {
         let stream = stream.map(|value| {
             {
                 serde_json::from_str::<Log>(value.get())
-                    .map_err(|err| anyhow!(err))
-                    .context("Failed to deserialize log")
+                    .map_err(|err| anyhow!("Failed to deserialize log: {err}"))
             }
-            .and_then(|log| decode_fill_event(log).context("Failed to decode fille event"))
+            .and_then(|log| {
+                decode_fill_event(log).map_err(|err| anyhow!("Failed to decode fill event: {err}"))
+            })
         });
 
         Ok(stream.boxed())

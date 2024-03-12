@@ -28,10 +28,13 @@ pub fn orders_stream(
         |(mut orders_service, current_request)| async move {
             match orders_service.ready().await {
                 Ok(service) => match service.call(current_request.clone()).await {
-                    Ok(payload) => Some((
-                        Ok(payload.orders),
-                        (orders_service, current_request.with_cursor(payload.cursor)),
-                    )),
+                    Ok(payload) => {
+                        let current_request = current_request
+                            .with_cursor(payload.cursor)
+                            .or_with_cursor_from_order(payload.orders.last());
+
+                        Some((Ok(payload.orders), (orders_service, current_request)))
+                    }
                     Err(err) => Some((
                         Err(StreamError::new(err, current_request.clone())),
                         (orders_service, current_request),
