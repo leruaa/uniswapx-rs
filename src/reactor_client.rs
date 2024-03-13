@@ -55,7 +55,7 @@ impl ReactorClient {
             .address(self.reactor_contract_address)
             .event(ExclusiveDutchOrderReactorContract::Fill::SIGNATURE);
 
-        let fill_event_logs = provider.get_logs(filter).await?;
+        let fill_event_logs = provider.get_logs(&filter).await?;
         let mut events = vec![];
 
         for log in fill_event_logs.into_iter().filter(|l| !l.removed) {
