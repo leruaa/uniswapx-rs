@@ -1,3 +1,4 @@
+use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::Serialize;
 use serde_json::to_string;
 
@@ -31,10 +32,12 @@ impl OrdersRequest {
                 ),
             };
             self.cursor = order.map(|o| {
-                format!(
+                let json = format!(
                     r#"{{"{filter_key}":"{filter_value}","createdAt":{},"orderHash":"{}"}}"#,
                     o.created_at, o.order_hash
-                )
+                );
+
+                STANDARD.encode(json.as_bytes())
             })
         }
         self
