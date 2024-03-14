@@ -20,27 +20,28 @@ impl OrdersRequest {
     }
     /// We need to build a cursor form the last known order. For instance:
     /// {"chainId_orderStatus":"1_filled","createdAt":1685115350,"orderHash":"0x8b984116a793011c9288f00ce0e3a5eb5bee9234e006de154551bc915d676654"}
-    pub fn or_with_cursor_from_order(mut self, order: Option<&Order>) -> Self {
-        if self.cursor.is_none() {
+    pub fn cursor_from_order(&self, order: Option<&Order>) -> Option<String> {
+        order.map(|o| {
             let (filter_key, filter_value) = match (self.chain_id, &self.order_status) {
                 (None, None) => panic!("At least one of chain id or order status"),
-                (None, Some(order_status)) => ("orderStatus", to_string(&order_status).unwrap()),
+                (None, Some(order_status)) => ("orderStatus", format!("{order_status}")),
                 (Some(chain_id), None) => ("chainId", chain_id.to_string()),
-                (Some(chain_id), Some(order_status)) => (
-                    "chainId_orderStatus",
-                    format!("{chain_id}_{}", order_status),
-                ),
+                (Some(chain_id), Some(order_status)) => {
+                    ("chainId_orderStatus", format!("{chain_id}_{order_status}"))
+                }
             };
-            self.cursor = order.map(|o| {
-                let json = format!(
-                    r#"{{"{filter_key}":"{filter_value}","createdAt":{},"orderHash":"{}"}}"#,
-                    o.created_at, o.order_hash
-                );
 
-                STANDARD.encode(json.as_bytes())
-            })
-        }
-        self
+            let json = format!(
+                r#"{{"{filter_key}":"{filter_value}","createdAt":{},"orderHash":"{}"}}"#,
+                o.created_at, o.order_hash
+            );
+
+            let cur = STANDARD.encode(json.as_bytes());
+
+            println!("{cur}");
+
+            cur
+        })
     }
 }
 
@@ -67,12 +68,12 @@ mod tests {
             ..Default::default()
         };
 
-        let request = request.or_with_cursor_from_order(Some(&order));
+        let cursor = request.cursor_from_order(Some(&order));
 
         assert_eq!(
-            request.cursor,
+            cursor,
             Some(String::from(
-                r#"{"chainId_orderStatus":"1_filled","createdAt":0,"orderHash":"0x00000000000000000000000000000000000000000000000000000000000000aa"}"#
+                "eyJjaGFpbklkX29yZGVyU3RhdHVzIjoiMV9maWxsZWQiLCJjcmVhdGVkQXQiOjAsIm9yZGVySGFzaCI6IjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDBhYSJ9"
             ))
         );
     }
