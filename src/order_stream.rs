@@ -11,7 +11,7 @@ use tower::{Service, ServiceBuilder, ServiceExt};
 
 use crate::{
     orders_service::OrdersService,
-    types::{Order, OrdersRequest},
+    types::{Order, OrderStatus, OrdersRequest},
     OrdersError,
 };
 
@@ -25,13 +25,20 @@ pub fn orders_stream(
 
     stream::unfold(
         (orders_service, request),
-        |(mut orders_service, current_request)| async move {
+        |(mut orders_service, mut current_request)| async move {
             match orders_service.ready().await {
                 Ok(service) => match service.call(current_request.clone()).await {
                     Ok(payload) => {
-                        let current_request = current_request
-                            .with_cursor(payload.cursor)
-                            .or_with_cursor_from_order(payload.orders.last());
+                        if let Some(order_status) = &current_request.order_status {
+                            if matches!(order_status, OrderStatus::Filled) {
+                                let next_request_cursor = payload
+                                    .cursor
+                                    .or(current_request.cursor.clone())
+                                    .or(current_request.cursor_from_order(payload.orders.last()));
+
+                                current_request = current_request.with_cursor(next_request_cursor);
+                            }
+                        }
 
                         Some((Ok(payload.orders), (orders_service, current_request)))
                     }
