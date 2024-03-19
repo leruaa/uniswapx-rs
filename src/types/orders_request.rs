@@ -1,6 +1,5 @@
 use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::Serialize;
-use serde_json::to_string;
 
 use super::{Order, OrderStatus};
 

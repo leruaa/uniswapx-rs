@@ -1,8 +1,6 @@
 use std::env;
 
-use alloy_json_rpc::Id;
-use alloy_pubsub::PubSubConnect;
-use alloy_transport_ws::WsConnect;
+use alloy::{pubsub::PubSubConnect, rpc::json_rpc::Id, transports::ws::WsConnect};
 use dotenv::dotenv;
 use futures::StreamExt;
 use uniswapx::ReactorClient;

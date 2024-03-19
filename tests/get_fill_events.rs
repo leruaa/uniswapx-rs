@@ -1,8 +1,6 @@
 use std::{env, sync::Arc};
 
-use alloy_network::Ethereum;
-use alloy_provider::ProviderBuilder;
-use alloy_rpc_client::RpcClient;
+use alloy::{network::Ethereum, providers::ProviderBuilder, rpc::client::RpcClient};
 use dotenv::dotenv;
 use uniswapx::ReactorClient;
 

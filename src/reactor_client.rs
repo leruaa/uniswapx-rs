@@ -1,16 +1,20 @@
 use std::sync::Arc;
 
-use alloy_json_rpc::{Id, Request, RequestMeta, ResponsePayload};
-use alloy_network::Network;
-use alloy_primitives::{Address, U256};
-use alloy_provider::{Provider, RootProvider};
-use alloy_pubsub::PubSubFrontend;
-use alloy_rpc_types::{
-    pubsub::{Params, SubscriptionKind},
-    BlockNumberOrTag, Filter, Log,
+use alloy::{
+    network::Network,
+    providers::{Provider, RootProvider},
+    pubsub::PubSubFrontend,
+    rpc::{
+        json_rpc::{Id, Request, RequestMeta, ResponsePayload},
+        types::eth::{
+            pubsub::{Params, SubscriptionKind},
+            BlockNumberOrTag, Filter, Log,
+        },
+    },
+    transports::Transport,
 };
+use alloy_primitives::{Address, U256};
 use alloy_sol_types::{sol, SolEvent};
-use alloy_transport::Transport;
 use anyhow::{anyhow, bail, Result};
 use futures::{
     stream::{self, BoxStream},
@@ -75,7 +79,7 @@ impl ReactorClient {
         let stringified_id = id.to_string();
 
         let req = Request {
-            meta: RequestMeta::new("eth_subscribe", id),
+            meta: RequestMeta::new("eth_subscribe".into(), id),
             params: [
                 serde_json::to_value(SubscriptionKind::Logs)?,
                 serde_json::to_value(Params::Logs(Box::new(
