@@ -35,11 +35,7 @@ impl OrdersRequest {
                 o.created_at, o.order_hash
             );
 
-            let cur = STANDARD.encode(json.as_bytes());
-
-            println!("{cur}");
-
-            cur
+            STANDARD.encode(json.as_bytes())
         })
     }
 }
