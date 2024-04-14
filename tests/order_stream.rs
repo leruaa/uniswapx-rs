@@ -1,6 +1,6 @@
 use std::pin::pin;
 
-use alloy_primitives::hex;
+use alloy::primitives::hex;
 use futures::StreamExt;
 use uniswapx::{orders_stream, types::OrdersRequest};
 

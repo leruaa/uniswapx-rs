@@ -1,4 +1,4 @@
-use alloy_primitives::{Bytes, B256};
+use alloy::primitives::{Bytes, B256};
 use anyhow::Error;
 use serde::Deserialize;
 use uniswapx_rs::order::{decode_order, ExclusiveDutchOrder};

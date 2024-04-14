@@ -1,4 +1,4 @@
-use alloy_primitives::hex;
+use alloy::primitives::hex;
 use tower::Service;
 use uniswapx::{types::OrdersRequest, OrdersService};
 

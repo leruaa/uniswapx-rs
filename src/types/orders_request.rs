@@ -42,7 +42,7 @@ impl OrdersRequest {
 
 #[cfg(test)]
 mod tests {
-    use alloy_primitives::hex;
+    use alloy::primitives::hex;
 
     use crate::types::{Order, OrderStatus};
 

@@ -1,6 +1,6 @@
 use std::{env, sync::Arc};
 
-use alloy::{network::Ethereum, providers::ProviderBuilder, rpc::client::RpcClient};
+use alloy::providers::ProviderBuilder;
 use dotenv::dotenv;
 use uniswapx::ReactorClient;
 
@@ -8,8 +8,10 @@ use uniswapx::ReactorClient;
 async fn test_get_fill_events() {
     dotenv().ok();
     let eth_rpc = env::var("ETH_RPC").unwrap();
-    let rpc_client = RpcClient::builder().reqwest_http(eth_rpc.parse().unwrap());
-    let provider = ProviderBuilder::<_, Ethereum>::new().on_client(rpc_client);
+
+    let provider = ProviderBuilder::new()
+        .on_http(eth_rpc.parse().unwrap())
+        .unwrap();
     let reactor_client = ReactorClient::new(1);
 
     let events = reactor_client

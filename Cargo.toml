@@ -8,8 +8,6 @@ edition = "2021"
 [dependencies]
 erc20 = { git = "https://github.com/leruaa/erc20-rs" }
 uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "encode_refactoring" }
-alloy-primitives = "0.6"
-alloy-sol-types = { version = "0.6", features = ["json"] }
 alloy = { git = "https://github.com/alloy-rs/alloy", features = [
     "network",
     "providers",
@@ -21,13 +19,14 @@ alloy = { git = "https://github.com/alloy-rs/alloy", features = [
     "rpc-types",
     "rpc-types-eth",
     "json-rpc",
+    "sol-types",
 ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio-stream = { version = "0.1", features = ["sync"] }
 futures = "0.3"
 tower = { version = "0.4", features = ["limit", "util"] }
-reqwest = "0.11"
+reqwest = "0.12"
 dashu-float = "0.4"
 base64 = "0.22"
 thiserror = "1.0"

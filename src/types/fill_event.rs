@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use alloy_primitives::{Address, B256, U256};
+use alloy::primitives::{Address, B256};
 
 #[derive(Debug, Clone)]
 pub struct FillEvent {
@@ -8,7 +8,7 @@ pub struct FillEvent {
     pub filler: Address,
     pub swapper: Address,
     pub tx: B256,
-    pub block_number: U256,
+    pub block_number: u64,
 }
 
 impl FillEvent {
@@ -17,7 +17,7 @@ impl FillEvent {
         filler: Address,
         swapper: Address,
         tx: B256,
-        block_number: U256,
+        block_number: u64,
     ) -> Self {
         Self {
             order_hash,

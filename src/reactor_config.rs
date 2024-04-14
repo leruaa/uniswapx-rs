@@ -1,4 +1,4 @@
-use alloy_primitives::{address, Address};
+use alloy::primitives::{address, Address};
 
 pub struct ReactorConfig {
     pub address: Address,

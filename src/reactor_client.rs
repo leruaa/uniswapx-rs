@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use alloy::primitives::{Address, U256};
 use alloy::{
     network::Network,
     providers::{Provider, RootProvider},
@@ -11,10 +12,10 @@ use alloy::{
             BlockNumberOrTag, Filter, Log,
         },
     },
+    sol,
+    sol_types::SolEvent,
     transports::Transport,
 };
-use alloy_primitives::{Address, U256};
-use alloy_sol_types::{sol, SolEvent};
 use anyhow::{anyhow, bail, Result};
 use futures::{
     stream::{self, BoxStream},
@@ -42,16 +43,16 @@ impl ReactorClient {
         }
     }
 
-    pub async fn get_fill_events<B, N, T>(
+    pub async fn get_fill_events<B, T, N>(
         &self,
-        provider: Arc<RootProvider<N, T>>,
+        provider: Arc<RootProvider<T, N>>,
         from_block: B,
         to_block: Option<B>,
     ) -> Result<Vec<FillEvent>>
     where
         B: Into<BlockNumberOrTag>,
-        N: Network,
         T: Transport + Clone,
+        N: Network,
     {
         let filter = Filter::new()
             .from_block(from_block)
@@ -131,8 +132,7 @@ impl ReactorClient {
 }
 
 pub fn decode_fill_event(log: Log) -> Result<FillEvent> {
-    let ev =
-        ExclusiveDutchOrderReactorContract::Fill::decode_log_data(&log.clone().try_into()?, true)?;
+    let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_data(log.data(), true)?;
 
     let fill = FillEvent::new(
         ev.orderHash,
