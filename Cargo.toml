@@ -18,6 +18,7 @@ alloy = { version = "0.1", features = [
     "rpc-types",
     "rpc-types-eth",
     "json-rpc",
+    "json",
     "sol-types",
 ] }
 serde = { version = "1.0", features = ["derive"] }
