@@ -6,9 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-alloy-erc20 = { git = "https://github.com/leruaa/alloy-erc20" }
 uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "encode_refactoring" }
-alloy = { git = "https://github.com/alloy-rs/alloy", features = [
+alloy = { version = "0.1", features = [
     "network",
     "providers",
     "transports",
