@@ -4,6 +4,7 @@ use serde::Deserialize;
 use super::OrderStatus;
 
 #[derive(Debug, Clone, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OrderNotification {
     pub order_hash: B256,
     pub created_at: u64,
