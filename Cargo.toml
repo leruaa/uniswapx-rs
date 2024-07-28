@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "encode_refactoring" }
-alloy = { version = "0.1", features = [
+alloy = { version = "0.2", features = [
     "network",
     "providers",
     "transports",
