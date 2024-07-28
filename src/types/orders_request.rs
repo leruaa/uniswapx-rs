@@ -1,12 +1,13 @@
 use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::Serialize;
 
-use super::{Order, OrderStatus};
+use super::{Order, OrderStatus, OrderType};
 
 #[derive(Debug, Clone, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OrdersRequest {
     pub chain_id: Option<u64>,
+    pub order_type: Option<OrderType>,
     pub order_status: Option<OrderStatus>,
     pub order_hash: Option<String>,
     pub cursor: Option<String>,
