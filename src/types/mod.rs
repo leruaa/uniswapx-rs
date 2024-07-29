@@ -1,3 +1,4 @@
+mod dutch_order;
 mod fill_event;
 mod order;
 mod order_input;
@@ -9,6 +10,7 @@ mod order_type;
 mod orders_request;
 mod settled_amount;
 
+pub use dutch_order::DutchOrder;
 pub use fill_event::FillEvent;
 pub use order::Order;
 pub use order_input::OrderInput;

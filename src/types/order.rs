@@ -1,9 +1,8 @@
 use alloy::primitives::{Bytes, B256};
-use anyhow::Error;
+use anyhow::{bail, Error};
 use serde::Deserialize;
-use uniswapx_rs::order::{decode_order, ExclusiveDutchOrder};
 
-use super::{OrderInput, OrderOutput, OrderStatus, OrderType, SettledAmount};
+use super::{DutchOrder, OrderInput, OrderOutput, OrderStatus, OrderType, SettledAmount};
 
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,12 +21,15 @@ pub struct Order {
     pub created_at: u64,
 }
 
-impl TryFrom<&Order> for ExclusiveDutchOrder {
+impl TryFrom<&Order> for DutchOrder {
     type Error = Error;
 
-    fn try_from(value: &Order) -> Result<Self, Self::Error> {
-        let encoded_order = value.encoded_order.to_string();
-        decode_order(&encoded_order)
+    fn try_from(order: &Order) -> Result<Self, Self::Error> {
+        match &order.order_type {
+            OrderType::Dutch => DutchOrder::try_from_v1(&order.encoded_order),
+            OrderType::DutchV2 => DutchOrder::try_from_v2(&order.encoded_order),
+            ty => bail!("Order of type '{ty:?}' can't be decoded"),
+        }
     }
 }
 

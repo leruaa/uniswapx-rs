@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-uniswapx-rs = { git = "https://github.com/leruaa/uniswapx-artemis", branch = "encode_refactoring" }
 alloy = { version = "0.2", features = [
     "network",
     "providers",
