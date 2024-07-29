@@ -10,7 +10,7 @@ mod order_type;
 mod orders_request;
 mod settled_amount;
 
-pub use dutch_order::DutchOrder;
+pub use dutch_order::{DutchOrder, DutchInput, DutchOutput, OrderResolution};
 pub use fill_event::FillEvent;
 pub use order::Order;
 pub use order_input::OrderInput;
