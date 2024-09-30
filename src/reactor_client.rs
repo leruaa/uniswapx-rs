@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use alloy::primitives::{Address, U256};
+use alloy::primitives::Address;
 use alloy::{
     network::Network,
     providers::{Provider, RootProvider},
@@ -94,7 +94,7 @@ impl ReactorClient {
         let response = front_end
             .send(req.serialize()?)
             .await?
-            .deser_success::<U256>()
+            .deser_success()
             .map_err(|_| anyhow!("The payload can't be deserialized"))?;
 
         let subscription_id = match response.payload {
