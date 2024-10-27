@@ -14,6 +14,7 @@ async fn test_get_fill_events_stream() {
     let connect = WsConnect {
         url: eth_rpc,
         auth: None,
+        config: None,
     };
 
     let front_end = connect.into_service().await.unwrap();
