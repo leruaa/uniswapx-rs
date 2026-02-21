@@ -5,6 +5,8 @@ pub enum OrderType {
     Dutch,
     #[serde(rename = "Dutch_V2")]
     DutchV2,
+    #[serde(rename = "Dutch_V3")]
+    DutchV3,
     Limit,
     Relay,
     #[default]

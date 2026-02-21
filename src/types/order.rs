@@ -1,6 +1,6 @@
-use alloy::primitives::{Bytes, B256};
+use alloy::primitives::{Bytes, B256, I256, U256};
 use anyhow::{bail, Error};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::{DutchOrder, OrderInput, OrderOutput, OrderStatus, OrderType, SettledAmount};
 
@@ -19,6 +19,13 @@ pub struct Order {
     pub tx_hash: Option<String>,
     pub settled_amounts: Option<Vec<SettledAmount>>,
     pub created_at: u64,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NonlinearDutchDecay {
+    pub relative_blocks: Vec<U256>,
+    pub relative_amounts: Vec<I256>,
 }
 
 impl TryFrom<&Order> for DutchOrder {
@@ -67,7 +74,7 @@ mod tests {
         let order = serde_json::from_str::<Order>(data).unwrap();
 
         assert_eq!(
-            order.input.start_amount.to_string(),
+            order.input.start_amount().to_string(),
             "100000000000000000000"
         );
     }

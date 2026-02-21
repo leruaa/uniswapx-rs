@@ -34,7 +34,7 @@ async fn test_order_stream() {
 async fn test_open_order_stream() {
     let request = OrdersRequest {
         chain_id: Some(42161), //42161
-        order_type: Some(OrderType::DutchV1V2),
+        order_type: Some(OrderType::DutchV3),
         order_status: Some(OrderStatus::Open),
         ..Default::default()
     };
