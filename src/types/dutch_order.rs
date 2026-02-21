@@ -70,11 +70,11 @@ pub enum DutchOrder {
 
 impl DutchOrder {
     pub fn try_from_v1(encoded: &Bytes) -> Result<Self> {
-        Ok(Self::V1(DutchOrderV1::abi_decode(encoded, true)?))
+        Ok(Self::V1(DutchOrderV1::abi_decode(encoded)?))
     }
 
     pub fn try_from_v2(encoded: &Bytes) -> Result<Self> {
-        Ok(Self::V2(DutchOrderV2::abi_decode(encoded, true)?))
+        Ok(Self::V2(DutchOrderV2::abi_decode(encoded)?))
     }
 
     pub fn deadline(&self) -> U256 {

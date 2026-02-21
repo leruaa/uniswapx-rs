@@ -11,11 +11,7 @@ async fn test_get_fill_events_stream() {
     dotenv().ok();
     let eth_rpc = env::var("ETH_WS_RPC").unwrap();
 
-    let connect = WsConnect {
-        url: eth_rpc,
-        auth: None,
-        config: None,
-    };
+    let connect = WsConnect::new(eth_rpc);
 
     let front_end = connect.into_service().await.unwrap();
 

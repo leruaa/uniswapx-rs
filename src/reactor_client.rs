@@ -14,7 +14,6 @@ use alloy::{
     },
     sol,
     sol_types::SolEvent,
-    transports::Transport,
 };
 use anyhow::{anyhow, bail, Result};
 use futures::{
@@ -43,15 +42,15 @@ impl ReactorClient {
         }
     }
 
-    pub async fn get_fill_events<B, T, N>(
+    pub async fn get_fill_events<B, P, N>(
         &self,
-        provider: Arc<RootProvider<T, N>>,
+        provider: Arc<P>,
         from_block: B,
         to_block: Option<B>,
     ) -> Result<Vec<FillEvent>>
     where
         B: Into<BlockNumberOrTag>,
-        T: Transport + Clone,
+        P: Provider<N>,
         N: Network,
     {
         let filter = Filter::new()
@@ -132,7 +131,7 @@ impl ReactorClient {
 }
 
 pub fn decode_fill_event(log: Log) -> Result<FillEvent> {
-    let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_data(log.data(), true)?;
+    let ev = ExclusiveDutchOrderReactorContract::Fill::decode_log_data(log.data())?;
 
     let fill = FillEvent::new(
         ev.orderHash,
