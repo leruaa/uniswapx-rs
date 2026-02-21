@@ -73,10 +73,10 @@ impl ReactorClient {
     }
 
     pub async fn get_fill_events_stream(
-        &self,
+        &'_ self,
         front_end: &PubSubFrontend,
         id: Id,
-    ) -> Result<BoxStream<Result<FillEvent>>> {
+    ) -> Result<BoxStream<'_, Result<FillEvent>>> {
         let stringified_id = id.to_string();
 
         let req = Request {
