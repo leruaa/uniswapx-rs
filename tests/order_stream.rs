@@ -13,8 +13,7 @@ async fn test_order_stream() {
         chain_id: Some(1),
         ..Default::default()
     };
-    let mut orders_stream =
-        orders_stream(String::from("https://api.uniswap.org/v2/orders"), request);
+    let orders_stream = orders_stream(String::from("https://api.uniswap.org/v2/orders"), request);
 
     let mut orders_stream = pin!(orders_stream);
 
@@ -39,8 +38,7 @@ async fn test_open_order_stream() {
         order_status: Some(OrderStatus::Open),
         ..Default::default()
     };
-    let mut orders_stream =
-        orders_stream(String::from("https://api.uniswap.org/v2/orders"), request);
+    let orders_stream = orders_stream(String::from("https://api.uniswap.org/v2/orders"), request);
 
     let mut orders_stream = pin!(orders_stream);
 
