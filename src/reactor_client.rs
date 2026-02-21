@@ -3,7 +3,7 @@ use std::sync::Arc;
 use alloy::primitives::Address;
 use alloy::{
     network::Network,
-    providers::{Provider, RootProvider},
+    providers::Provider,
     pubsub::PubSubFrontend,
     rpc::{
         json_rpc::{Id, Request, RequestMeta, ResponsePayload},
