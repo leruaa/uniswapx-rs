@@ -23,6 +23,13 @@ impl OrderInput {
             OrderInput::DutchV3(input) => input.start_amount,
         }
     }
+
+    pub fn token(&self) -> Address {
+        match self {
+            OrderInput::DutchV2(input) => input.token,
+            OrderInput::DutchV3(input) => input.token,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, Default, Serialize, Deserialize)]

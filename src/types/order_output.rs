@@ -10,6 +10,22 @@ pub enum OrderOutput {
     DutchV3(DutchOutputV3),
 }
 
+impl OrderOutput {
+    pub fn start_amount(&self) -> U256 {
+        match self {
+            OrderOutput::DutchV2(dutch_output) => dutch_output.start_amount,
+            OrderOutput::DutchV3(dutch_output_v3) => dutch_output_v3.start_amount,
+        }
+    }
+
+    pub fn token(&self) -> Address {
+        match self {
+            OrderOutput::DutchV2(dutch_output) => dutch_output.token,
+            OrderOutput::DutchV3(dutch_output_v3) => dutch_output_v3.token,
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DutchOutput {
